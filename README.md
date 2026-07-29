@@ -1,0 +1,47 @@
+# Exercise PDF Generator
+
+A collection of Python scripts that generate printable PDF worksheets for students. Each script produces one kind of exercise: it builds randomized problems, writes a LaTeX document, and compiles it to PDF with `pdflatex`.
+
+## Requirements
+
+- **Python 3** (standard library only; no extra packages)
+- **`pdflatex`** (from a TeX distribution such as [TeX Live](https://www.tug.org/texlive/), [MiKTeX](https://miktex.org/), or [MacTeX](https://www.tug.org/mactex/))
+
+Confirm both are available:
+
+```bash
+python --version
+pdflatex --version
+```
+
+## Scripts
+
+| Script | Exercise type |
+|--------|----------------|
+| `generate-exercises-average-numbers.py` | Calculating averages (mean) of integer sets; answers are whole numbers |
+| `generate-exercises-rational-operation.py` | Rational-number mixed operations (integers and fractions, with order of operations) |
+
+## Usage
+
+Run a script from the project directory. Each run prints the generated problems, compiles a PDF, and removes intermediate `.tex` / `.log` / `.aux` files on success.
+
+```bash
+python generate-exercises-average-numbers.py
+python generate-exercises-rational-operation.py
+```
+
+Output PDFs are named with a timestamp, for example:
+
+- `average_exercises_20260729143055.pdf`
+- `rational_operations_20260729143055.pdf`
+
+## Customization
+
+At the top of each script you can adjust constants such as:
+
+- number of exercises
+- value ranges
+- spacing and column layout
+- output file name prefix
+
+Then run the script again to generate a new worksheet.
