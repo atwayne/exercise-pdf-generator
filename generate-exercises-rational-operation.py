@@ -1,11 +1,15 @@
-import os
+"""Generate a printable PDF worksheet of rational mixed-operation exercises."""
+
 import random
-import subprocess
-from datetime import datetime
 from fractions import Fraction
 from math import gcd
-from pathlib import Path
-from string import Template
+
+from pdf_pipeline import (
+    build_answers_section,
+    format_enumerate_items,
+    render_worksheet,
+    write_and_compile,
+)
 
 # Total number of exercises to generate
 EXERCISE_COUNT = 20
@@ -17,10 +21,16 @@ NUMERATOR_MIN = 1
 NUMERATOR_MAX = 15
 DENOMINATOR_MIN = 2
 DENOMINATOR_MAX = 16
+# Chance that a random rational is an integer rather than a fraction
+INTEGER_PROBABILITY = 0.4
+# How many times to retry a pattern before falling back to a simple product
+PATTERN_ATTEMPTS = 50
 # Vertical spacing between enumerate items in the LaTeX PDF
 ITEMSEP = "1.2cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
+# When True, append a new page with the answer key
+GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Rational Numbers: Mixed Operations"
 INSTRUCTIONS = (
@@ -28,16 +38,8 @@ INSTRUCTIONS = (
     "Pay attention to integer and fraction rules, as well as negative signs. "
     "Simplify all answers."
 )
-# Shared LaTeX worksheet template (stdlib string.Template placeholders)
-TEMPLATE_FILE = Path(__file__).resolve().parent / "templates" / "worksheet.tex"
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "rational_operations"
-
-# Build base name with current timestamp, e.g. rational_operations_20260729143055
-OUTPUT_BASE = f"{OUTPUT_PREFIX}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-# Derived output paths for LaTeX and PDF
-TEX_FILE = f"{OUTPUT_BASE}.tex"
-PDF_FILE = f"{OUTPUT_BASE}.pdf"
 
 
 def random_sign():
@@ -61,7 +63,7 @@ def random_fraction():
 
 def random_rational():
     """Return either a random integer or fraction (as Fraction)."""
-    if random.random() < 0.4:
+    if random.random() < INTEGER_PROBABILITY:
         return Fraction(random_integer(), 1)
     return random_fraction()
 
@@ -83,14 +85,20 @@ def latex_rational(value):
     return body
 
 
+def latex_answer(value):
+    """Format a Fraction answer for the answer key (no extra parentheses)."""
+    if value.denominator == 1:
+        return str(value.numerator)
+    abs_num = abs(value.numerator)
+    body = rf"\frac{{{abs_num}}}{{{value.denominator}}}"
+    if value.numerator < 0:
+        return rf"-{body}"
+    return body
+
+
 def latex_op(op):
     """Map a Python operator symbol to its LaTeX counterpart."""
-    return {
-        "+": "+",
-        "-": "-",
-        "*": r"\times",
-        "/": r"\div",
-    }[op]
+    return {"+": "+", "-": "-", "*": r"\times", "/": r"\div"}[op]
 
 
 def apply_op(left, op, right):
@@ -107,122 +115,28 @@ def apply_op(left, op, right):
     return left / right
 
 
-def generate_expression():
-    """
-    Build one random mixed-operation expression and its exact Fraction result.
-    Templates mirror the style of the original fixed worksheet.
-    """
-    # Random operands used across templates
-    a = random_rational()
-    b = random_rational()
-    c = random_rational()
-    d = random_rational()
-
-    # Template builders: each returns (latex_string, exact_value)
-    templates = [
-        # a ± b × c
-        lambda: _add_mul(a, b, c),
-        # (a ± b) ÷ c
-        lambda: _paren_then_div(a, b, c),
-        # a × b ± c
-        lambda: _mul_then_add(a, b, c),
-        # a ÷ b ± c
-        lambda: _div_then_add(a, b, c),
-        # a ± b ± c
-        lambda: _add_chain(a, b, c),
-        # a × b ÷ c
-        lambda: _mul_div(a, b, c),
-        # (a ± b) × c
-        lambda: _paren_then_mul(a, b, c),
-        # a × b ± c ÷ d
-        lambda: _mul_add_div(a, b, c, d),
-        # (a ± b) × c ± d
-        lambda: _paren_mul_add(a, b, c, d),
-        # a ÷ (b ± c)
-        lambda: _div_paren(a, b, c),
-        # a × (b ± c) ÷ d
-        lambda: _mul_paren_div(a, b, c, d),
-        # (a ± b) ÷ c × d
-        lambda: _paren_div_mul(a, b, c, d),
-    ]
-
-    # Keep trying templates until one evaluates without division by zero
-    for _ in range(50):
-        try:
-            latex, value = random.choice(templates)()
-            return latex, value
-        except ZeroDivisionError:
-            continue
-    # Fallback: simple product if templates keep failing
-    return f"{latex_rational(a)} {latex_op('*')} {latex_rational(b)}", a * b
+def _pm():
+    """Pick addition or subtraction at random."""
+    return random.choice(["+", "-"])
 
 
-def _paren_then_div(a, b, c):
-    """Template: (a ± b) ÷ c"""
-    op = random.choice(["+", "-"])
-    inner = a + b if op == "+" else a - b
-    latex = (
-        rf"\left({latex_rational(a)} {latex_op(op)} {latex_rational(b)}\right) "
-        rf"{latex_op('/')} {latex_rational(c)}"
-    )
-    return latex, apply_op(inner, "/", c)
+def _bin(left, op, right):
+    """Return (latex, value) for a single binary operation."""
+    latex = f"{latex_rational(left)} {latex_op(op)} {latex_rational(right)}"
+    return latex, apply_op(left, op, right)
 
 
-def _mul_then_add(a, b, c):
-    """Template: a × b ± c"""
-    op = random.choice(["+", "-"])
-    latex = (
-        f"{latex_rational(a)} {latex_op('*')} {latex_rational(b)} "
-        f"{latex_op(op)} {latex_rational(c)}"
-    )
-    return latex, apply_op(a * b, op, c)
+def _paren(inner_latex):
+    """Wrap an expression fragment in sized parentheses."""
+    return rf"\left({inner_latex}\right)"
 
 
-def _div_then_add(a, b, c):
-    """Template: a ÷ b ± c"""
-    op = random.choice(["+", "-"])
-    latex = (
-        f"{latex_rational(a)} {latex_op('/')} {latex_rational(b)} "
-        f"{latex_op(op)} {latex_rational(c)}"
-    )
-    return latex, apply_op(apply_op(a, "/", b), op, c)
+# --- Expression patterns: each takes operands and returns (latex, value) ---
 
 
-def _add_chain(a, b, c):
-    """Template: a ± b ± c"""
-    op1 = random.choice(["+", "-"])
-    op2 = random.choice(["+", "-"])
-    latex = (
-        f"{latex_rational(a)} {latex_op(op1)} {latex_rational(b)} "
-        f"{latex_op(op2)} {latex_rational(c)}"
-    )
-    mid = apply_op(a, op1, b)
-    return latex, apply_op(mid, op2, c)
-
-
-def _mul_div(a, b, c):
-    """Template: a × b ÷ c"""
-    latex = (
-        f"{latex_rational(a)} {latex_op('*')} {latex_rational(b)} "
-        f"{latex_op('/')} {latex_rational(c)}"
-    )
-    return latex, apply_op(a * b, "/", c)
-
-
-def _paren_then_mul(a, b, c):
-    """Template: (a ± b) × c"""
-    op = random.choice(["+", "-"])
-    inner = a + b if op == "+" else a - b
-    latex = (
-        rf"\left({latex_rational(a)} {latex_op(op)} {latex_rational(b)}\right) "
-        rf"{latex_op('*')} {latex_rational(c)}"
-    )
-    return latex, inner * c
-
-
-def _add_mul(a, b, c):
-    """Template: a ± b × c  (multiplication binds first)"""
-    op = random.choice(["+", "-"])
+def pat_add_mul(a, b, c):
+    """Pattern: a ± b × c (multiplication binds first)."""
+    op = _pm()
     latex = (
         f"{latex_rational(a)} {latex_op(op)} {latex_rational(b)} "
         f"{latex_op('*')} {latex_rational(c)}"
@@ -230,9 +144,62 @@ def _add_mul(a, b, c):
     return latex, apply_op(a, op, b * c)
 
 
-def _mul_add_div(a, b, c, d):
-    """Template: a × b ± c ÷ d"""
-    op = random.choice(["+", "-"])
+def pat_paren_div(a, b, c):
+    """Pattern: (a ± b) ÷ c"""
+    inner_tex, inner_val = _bin(a, _pm(), b)
+    latex = f"{_paren(inner_tex)} {latex_op('/')} {latex_rational(c)}"
+    return latex, apply_op(inner_val, "/", c)
+
+
+def pat_mul_add(a, b, c):
+    """Pattern: a × b ± c"""
+    op = _pm()
+    latex = (
+        f"{latex_rational(a)} {latex_op('*')} {latex_rational(b)} "
+        f"{latex_op(op)} {latex_rational(c)}"
+    )
+    return latex, apply_op(a * b, op, c)
+
+
+def pat_div_add(a, b, c):
+    """Pattern: a ÷ b ± c"""
+    op = _pm()
+    latex = (
+        f"{latex_rational(a)} {latex_op('/')} {latex_rational(b)} "
+        f"{latex_op(op)} {latex_rational(c)}"
+    )
+    return latex, apply_op(apply_op(a, "/", b), op, c)
+
+
+def pat_add_chain(a, b, c):
+    """Pattern: a ± b ± c"""
+    op1, op2 = _pm(), _pm()
+    latex = (
+        f"{latex_rational(a)} {latex_op(op1)} {latex_rational(b)} "
+        f"{latex_op(op2)} {latex_rational(c)}"
+    )
+    return latex, apply_op(apply_op(a, op1, b), op2, c)
+
+
+def pat_mul_div(a, b, c):
+    """Pattern: a × b ÷ c"""
+    latex = (
+        f"{latex_rational(a)} {latex_op('*')} {latex_rational(b)} "
+        f"{latex_op('/')} {latex_rational(c)}"
+    )
+    return latex, apply_op(a * b, "/", c)
+
+
+def pat_paren_mul(a, b, c):
+    """Pattern: (a ± b) × c"""
+    inner_tex, inner_val = _bin(a, _pm(), b)
+    latex = f"{_paren(inner_tex)} {latex_op('*')} {latex_rational(c)}"
+    return latex, inner_val * c
+
+
+def pat_mul_add_div(a, b, c, d):
+    """Pattern: a × b ± c ÷ d"""
+    op = _pm()
     latex = (
         f"{latex_rational(a)} {latex_op('*')} {latex_rational(b)} "
         f"{latex_op(op)} {latex_rational(c)} {latex_op('/')} {latex_rational(d)}"
@@ -240,93 +207,134 @@ def _mul_add_div(a, b, c, d):
     return latex, apply_op(a * b, op, apply_op(c, "/", d))
 
 
-def _paren_mul_add(a, b, c, d):
-    """Template: (a ± b) × c ± d"""
-    op1 = random.choice(["+", "-"])
-    op2 = random.choice(["+", "-"])
-    inner = a + b if op1 == "+" else a - b
+def pat_paren_mul_add(a, b, c, d):
+    """Pattern: (a ± b) × c ± d"""
+    op1, op2 = _pm(), _pm()
+    inner_tex, inner_val = _bin(a, op1, b)
     latex = (
-        rf"\left({latex_rational(a)} {latex_op(op1)} {latex_rational(b)}\right) "
-        rf"{latex_op('*')} {latex_rational(c)} {latex_op(op2)} {latex_rational(d)}"
+        f"{_paren(inner_tex)} {latex_op('*')} {latex_rational(c)} "
+        f"{latex_op(op2)} {latex_rational(d)}"
     )
-    return latex, apply_op(inner * c, op2, d)
+    return latex, apply_op(inner_val * c, op2, d)
 
 
-def _div_paren(a, b, c):
-    """Template: a ÷ (b ± c)"""
-    op = random.choice(["+", "-"])
-    inner = b + c if op == "+" else b - c
+def pat_div_paren(a, b, c):
+    """Pattern: a ÷ (b ± c)"""
+    inner_tex, inner_val = _bin(b, _pm(), c)
+    latex = f"{latex_rational(a)} {latex_op('/')} {_paren(inner_tex)}"
+    return latex, apply_op(a, "/", inner_val)
+
+
+def pat_mul_paren_div(a, b, c, d):
+    """Pattern: a × (b ± c) ÷ d"""
+    inner_tex, inner_val = _bin(b, _pm(), c)
     latex = (
-        rf"{latex_rational(a)} {latex_op('/')} "
-        rf"\left({latex_rational(b)} {latex_op(op)} {latex_rational(c)}\right)"
+        f"{latex_rational(a)} {latex_op('*')} {_paren(inner_tex)} "
+        f"{latex_op('/')} {latex_rational(d)}"
     )
-    return latex, apply_op(a, "/", inner)
+    return latex, apply_op(a * inner_val, "/", d)
 
 
-def _mul_paren_div(a, b, c, d):
-    """Template: a × (b ± c) ÷ d"""
-    op = random.choice(["+", "-"])
-    inner = b + c if op == "+" else b - c
+def pat_paren_div_mul(a, b, c, d):
+    """Pattern: (a ± b) ÷ c × d"""
+    inner_tex, inner_val = _bin(a, _pm(), b)
     latex = (
-        rf"{latex_rational(a)} {latex_op('*')} "
-        rf"\left({latex_rational(b)} {latex_op(op)} {latex_rational(c)}\right) "
-        rf"{latex_op('/')} {latex_rational(d)}"
+        f"{_paren(inner_tex)} {latex_op('/')} {latex_rational(c)} "
+        f"{latex_op('*')} {latex_rational(d)}"
     )
-    return latex, apply_op(a * inner, "/", d)
+    return latex, apply_op(inner_val, "/", c) * d
 
 
-def _paren_div_mul(a, b, c, d):
-    """Template: (a ± b) ÷ c × d"""
-    op = random.choice(["+", "-"])
-    inner = a + b if op == "+" else a - b
-    latex = (
-        rf"\left({latex_rational(a)} {latex_op(op)} {latex_rational(b)}\right) "
-        rf"{latex_op('/')} {latex_rational(c)} {latex_op('*')} {latex_rational(d)}"
-    )
-    return latex, apply_op(inner, "/", c) * d
-
-
-# Generate unique random exercises until we reach EXERCISE_COUNT
-exercises = []
-seen = set()
-while len(exercises) < EXERCISE_COUNT:
-    latex, value = generate_expression()
-    # Skip duplicates so the worksheet does not repeat the same problem
-    if latex in seen:
-        continue
-    seen.add(latex)
-    exercises.append(latex)
-
-# Display the exercises in the output for the user to see
-for i, ex in enumerate(exercises, 1):
-    print(f"{i}. {ex}")
-
-# Build one enumerate item per exercise for the template
-items = "\n".join(rf"    \item ${ex}$" for ex in exercises)
-
-# Fill the shared LaTeX worksheet template with exercise-specific values
-latex_content = Template(TEMPLATE_FILE.read_text(encoding="utf-8")).substitute(
-    title=TITLE,
-    instructions=INSTRUCTIONS,
-    column_count=COLUMN_COUNT,
-    itemsep=ITEMSEP,
-    items=items,
+# Registry of expression shapes used when sampling a random problem
+EXPRESSION_PATTERNS = (
+    pat_add_mul,
+    pat_paren_div,
+    pat_mul_add,
+    pat_div_add,
+    pat_add_chain,
+    pat_mul_div,
+    pat_paren_mul,
+    pat_mul_add_div,
+    pat_paren_mul_add,
+    pat_div_paren,
+    pat_mul_paren_div,
+    pat_paren_div_mul,
 )
 
-# Write the generated LaTeX source file
-with open(TEX_FILE, "w", encoding="utf-8") as f:
-    f.write(latex_content)
 
-# Compile the LaTeX source to PDF
-result = subprocess.run(["pdflatex", TEX_FILE], capture_output=True, text=True)
+def generate_expression():
+    """
+    Build one random mixed-operation expression and its exact Fraction result.
+    Retries with fresh operands when a pattern hits division by zero.
+    """
+    for _ in range(PATTERN_ATTEMPTS):
+        pattern = random.choice(EXPRESSION_PATTERNS)
+        # Fresh operands sized to the chosen pattern's arity
+        operands = [random_rational() for _ in range(pattern.__code__.co_argcount)]
+        try:
+            return pattern(*operands)
+        except ZeroDivisionError:
+            continue
 
-# Report success or failure based on whether the PDF was produced
-if os.path.exists(PDF_FILE):
-    # Remove intermediate LaTeX artifacts; keep only the PDF
-    for ext in (".tex", ".log", ".aux"):
-        artifact = f"{OUTPUT_BASE}{ext}"
-        if os.path.exists(artifact):
-            os.remove(artifact)
-    print(f"\nPDF generated successfully: {PDF_FILE}")
-else:
-    print("Failed to generate PDF. Output:\n", result.stdout, "\nErrors:\n", result.stderr)
+    # Fallback: simple product if every attempt divided by zero
+    a, b = random_rational(), random_rational()
+    return f"{latex_rational(a)} {latex_op('*')} {latex_rational(b)}", a * b
+
+
+def generate_exercises():
+    """Return EXERCISE_COUNT unique (latex, value) exercise pairs."""
+    exercises = []
+    seen = set()
+    while len(exercises) < EXERCISE_COUNT:
+        latex, value = generate_expression()
+        # Skip duplicates so the worksheet does not repeat the same problem
+        if latex in seen:
+            continue
+        seen.add(latex)
+        exercises.append((latex, value))
+    return exercises
+
+
+def format_question(latex):
+    """Wrap an expression in math mode for the questions page."""
+    return f"${latex}$"
+
+
+def format_answer(value):
+    """Wrap a Fraction answer in math mode for the answer key."""
+    return f"${latex_answer(value)}$"
+
+
+def main():
+    """Generate exercises, render the worksheet, and compile the PDF."""
+    exercises = generate_exercises()
+
+    # Show the problems in the terminal for a quick preview
+    for i, (latex, value) in enumerate(exercises, 1):
+        print(f"{i}. {latex}  =  {value}")
+
+    # Build question items for the shared LaTeX template
+    items = format_enumerate_items(format_question(latex) for latex, _ in exercises)
+
+    # Optionally append a matching answer-key page
+    answers_section = ""
+    if GENERATE_ANSWERS:
+        answers_section = build_answers_section(
+            [format_answer(value) for _, value in exercises],
+            column_count=COLUMN_COUNT,
+            itemsep=ITEMSEP,
+        )
+
+    latex_content = render_worksheet(
+        title=TITLE,
+        instructions=INSTRUCTIONS,
+        column_count=COLUMN_COUNT,
+        itemsep=ITEMSEP,
+        items=items,
+        answers_section=answers_section,
+    )
+    write_and_compile(latex_content, OUTPUT_PREFIX)
+
+
+if __name__ == "__main__":
+    main()
