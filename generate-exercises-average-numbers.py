@@ -1,7 +1,9 @@
-import random
 import os
+import random
 import subprocess
 from datetime import datetime
+from pathlib import Path
+from string import Template
 
 # Total number of exercises to generate
 EXERCISE_COUNT = 18
@@ -13,6 +15,16 @@ NUMBER_VALUE_MIN = 1
 NUMBER_VALUE_MAX = 20
 # Vertical spacing between enumerate items in the LaTeX PDF
 ITEMSEP = "0.8cm"
+# Number of columns in the exercise layout
+COLUMN_COUNT = 2
+# Worksheet title and instructions injected into the LaTeX template
+TITLE = "Calculating Averages"
+INSTRUCTIONS = (
+    "Find the average (mean) for each set of numbers. "
+    "All answers evaluate to a whole integer."
+)
+# Shared LaTeX worksheet template (stdlib string.Template placeholders)
+TEMPLATE_FILE = Path(__file__).resolve().parent / "templates" / "worksheet.tex"
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "average_exercises"
 
@@ -37,41 +49,23 @@ while len(exercises) < EXERCISE_COUNT:
 for i, ex in enumerate(exercises, 1):
     print(f"{i}. {ex}")
 
-# Build the LaTeX document header and enumerate environment
-latex_content = rf"""\documentclass[12pt]{{article}}
-\usepackage{{amsmath}}
-\usepackage{{geometry}}
-\geometry{{a4paper, margin=1in}}
-\usepackage{{enumitem}}
-\usepackage{{multicol}}
+# Build one enumerate item per exercise for the template
+items = "\n".join(
+    rf"    \item Find the average of: \\[0.2cm] \textbf{{ {', '.join(map(str, ex))} }}"
+    for ex in exercises
+)
 
-\title{{\textbf{{Calculating Averages}}}}
-\author{{}}
-\date{{}}
-
-\begin{{document}}
-\maketitle
-\vspace{{-1.5cm}}
-\noindent Find the average (mean) for each set of numbers. All answers evaluate to a whole integer.
-
-\vspace{{0.5cm}}
-
-\begin{{multicols}}{{2}}
-\begin{{enumerate}}[label=\textbf{{\arabic*.}}, itemsep={ITEMSEP}]
-"""
-# Append one enumerate item per exercise
-for ex in exercises:
-    latex_content += f"    \\item Find the average of: \\\\[0.2cm] \\textbf{{ {', '.join(map(str, ex))} }}\n"
-
-# Close LaTeX environments
-latex_content += r"""\end{enumerate}
-\end{multicols}
-
-\end{document}
-"""
+# Fill the shared LaTeX worksheet template with exercise-specific values
+latex_content = Template(TEMPLATE_FILE.read_text(encoding="utf-8")).substitute(
+    title=TITLE,
+    instructions=INSTRUCTIONS,
+    column_count=COLUMN_COUNT,
+    itemsep=ITEMSEP,
+    items=items,
+)
 
 # Write the generated LaTeX source file
-with open(TEX_FILE, "w") as f:
+with open(TEX_FILE, "w", encoding="utf-8") as f:
     f.write(latex_content)
 
 # Compile the LaTeX source to PDF

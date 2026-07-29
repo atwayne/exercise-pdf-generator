@@ -4,6 +4,8 @@ import subprocess
 from datetime import datetime
 from fractions import Fraction
 from math import gcd
+from pathlib import Path
+from string import Template
 
 # Total number of exercises to generate
 EXERCISE_COUNT = 20
@@ -19,6 +21,15 @@ DENOMINATOR_MAX = 16
 ITEMSEP = "1.2cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
+# Worksheet title and instructions injected into the LaTeX template
+TITLE = "Rational Numbers: Mixed Operations"
+INSTRUCTIONS = (
+    "Evaluate each expression using the correct order of operations. "
+    "Pay attention to integer and fraction rules, as well as negative signs. "
+    "Simplify all answers."
+)
+# Shared LaTeX worksheet template (stdlib string.Template placeholders)
+TEMPLATE_FILE = Path(__file__).resolve().parent / "templates" / "worksheet.tex"
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "rational_operations"
 
@@ -290,41 +301,20 @@ while len(exercises) < EXERCISE_COUNT:
 for i, ex in enumerate(exercises, 1):
     print(f"{i}. {ex}")
 
-# Build the LaTeX document header and enumerate environment
-latex_content = rf"""\documentclass[12pt]{{article}}
-\usepackage{{amsmath}}
-\usepackage{{geometry}}
-\geometry{{a4paper, margin=1in}}
-\usepackage{{enumitem}}
-\usepackage{{multicol}}
+# Build one enumerate item per exercise for the template
+items = "\n".join(rf"    \item ${ex}$" for ex in exercises)
 
-\title{{\textbf{{Rational Numbers: Complex Mixed Operations}}}}
-\author{{}}
-\date{{}}
-
-\begin{{document}}
-\maketitle
-\vspace{{-1.5cm}}
-\noindent Evaluate each expression using the correct order of operations. Pay attention to integer and fraction rules, as well as negative signs. Simplify all answers.
-
-\vspace{{0.5cm}}
-
-\begin{{multicols}}{{{COLUMN_COUNT}}}
-\begin{{enumerate}}[label=\textbf{{\arabic*.}}, itemsep={ITEMSEP}]
-"""
-# Append one enumerate item per exercise
-for ex in exercises:
-    latex_content += f"    \\item ${ex}$\n"
-
-# Close LaTeX environments
-latex_content += r"""\end{enumerate}
-\end{multicols}
-
-\end{document}
-"""
+# Fill the shared LaTeX worksheet template with exercise-specific values
+latex_content = Template(TEMPLATE_FILE.read_text(encoding="utf-8")).substitute(
+    title=TITLE,
+    instructions=INSTRUCTIONS,
+    column_count=COLUMN_COUNT,
+    itemsep=ITEMSEP,
+    items=items,
+)
 
 # Write the generated LaTeX source file
-with open(TEX_FILE, "w") as f:
+with open(TEX_FILE, "w", encoding="utf-8") as f:
     f.write(latex_content)
 
 # Compile the LaTeX source to PDF

@@ -1,0 +1,25 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{enumitem}
+\usepackage{multicol}
+
+\title{\textbf{$title}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-1.5cm}
+\noindent $instructions
+
+\vspace{0.5cm}
+
+\begin{multicols}{$column_count}
+\begin{enumerate}[label=\textbf{\arabic*.}, itemsep=$itemsep]
+$items
+\end{enumerate}
+\end{multicols}
+
+\end{document}
