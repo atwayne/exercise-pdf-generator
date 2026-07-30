@@ -22,7 +22,7 @@ ITEMSEP = "0.8cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
-GENERATE_ANSWERS = False
+GENERATE_ANSWERS = True
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Calculating Averages"
 INSTRUCTIONS = (
