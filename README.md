@@ -20,6 +20,7 @@ pdflatex --version
 |--------|----------------|
 | `generate-exercises-average-numbers.py` | Calculating averages (mean) of integer sets; answers are whole numbers |
 | `generate-exercises-rational-operation.py` | Rational-number mixed operations (integers and fractions, with order of operations) |
+| `generate-exercises-linear-system.py` | Systems of two linear equations in $x$ and $y$ (unique solution; rational coeffs/answers) |
 
 ## Usage
 
@@ -28,12 +29,14 @@ Run a script from the project directory. Each run prints the generated problems,
 ```bash
 python generate-exercises-average-numbers.py
 python generate-exercises-rational-operation.py
+python generate-exercises-linear-system.py
 ```
 
 Output PDFs are named with a timestamp, for example:
 
 - `average_exercises_20260729143055.pdf`
 - `rational_operations_20260729143055.pdf`
+- `linear_systems_20260729143055.pdf`
 
 ## Customization
 
