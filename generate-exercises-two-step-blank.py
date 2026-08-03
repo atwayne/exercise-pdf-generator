@@ -32,8 +32,8 @@ GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Two-Step Blank"
 INSTRUCTIONS = (
-    "Find the missing number in each two-step expression. "
-    "then complete the second step. All answers are whole positive integers."
+    "Find the missing number in each two-step expression, "
+    "All answers are whole positive integers."
 )
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "two_step_blank"
