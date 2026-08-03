@@ -23,6 +23,7 @@ pdflatex --version
 | `generate-exercises-rational-operation.py` | Rational-number mixed operations (integers and fractions, with order of operations) |
 | `generate-exercises-linear-system.py` | Systems of two linear equations in $x$ and $y$ (unique solution; rational coeffs/answers) |
 | `generate-exercises-target-sum.py` | Circle numbers in a list that add up to a target (0–2 unused distractors) |
+| `generate-exercises-two-step-blank.py` | Two-step arithmetic with one missing number (any of the three slots) |
 
 ## Usage
 
@@ -34,6 +35,7 @@ python generate-exercises-missing-mean.py
 python generate-exercises-rational-operation.py
 python generate-exercises-linear-system.py
 python generate-exercises-target-sum.py
+python generate-exercises-two-step-blank.py
 ```
 
 Output PDFs are named with a timestamp, for example:
@@ -43,6 +45,7 @@ Output PDFs are named with a timestamp, for example:
 - `rational_operations_20260729143055.pdf`
 - `linear_systems_20260729143055.pdf`
 - `target_sum_20260802113000.pdf`
+- `two_step_blank_20260804074500.pdf`
 
 ## Customization
 
