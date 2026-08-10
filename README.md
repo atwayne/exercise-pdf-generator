@@ -24,6 +24,7 @@ pdflatex --version
 | `generate-exercises-linear-system.py` | Systems of two linear equations in $x$ and $y$ (unique solution; rational coeffs/answers) |
 | `generate-exercises-target-sum.py` | Circle numbers in a list that add up to a target (0–2 unused distractors) |
 | `generate-exercises-two-step-blank.py` | Two-step arithmetic with one missing number (any of the three slots) |
+| `generate-exercises-three-step-result.py` | Three-step arithmetic (four numbers); student finds the result |
 
 ## Usage
 
@@ -36,6 +37,7 @@ python generate-exercises-rational-operation.py
 python generate-exercises-linear-system.py
 python generate-exercises-target-sum.py
 python generate-exercises-two-step-blank.py
+python generate-exercises-three-step-result.py
 ```
 
 Output PDFs are named with a timestamp, for example:
@@ -46,6 +48,7 @@ Output PDFs are named with a timestamp, for example:
 - `linear_systems_20260729143055.pdf`
 - `target_sum_20260802113000.pdf`
 - `two_step_blank_20260804074500.pdf`
+- `three_step_result_20260811000000.pdf`
 
 ## Customization
 
