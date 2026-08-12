@@ -253,12 +253,12 @@ def generate_one_exercise():
     }
 
 
-def generate_exercises():
-    """Return EXERCISE_COUNT unique three-step result exercises."""
+def generate_exercises(count=EXERCISE_COUNT):
+    """Return `count` unique three-step result exercises."""
     exercises = []
     seen = set()
     # Extra attempts so duplicate expressions can be replaced
-    while len(exercises) < EXERCISE_COUNT:
+    while len(exercises) < count:
         exercise = generate_one_exercise()
         key = expression_key(exercise)
         if key in seen:

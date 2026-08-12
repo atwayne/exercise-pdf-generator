@@ -288,12 +288,12 @@ def generate_one_system():
     return None
 
 
-def generate_exercises():
-    """Return EXERCISE_COUNT unique (eq1, eq2, x, y) systems."""
+def generate_exercises(count=EXERCISE_COUNT):
+    """Return `count` unique (eq1, eq2, x, y) systems."""
     exercises = []
     # Deduplicate by the solution pair plus coefficient fingerprint
     seen = set()
-    while len(exercises) < EXERCISE_COUNT:
+    while len(exercises) < count:
         system = generate_one_system()
         if system is None:
             continue

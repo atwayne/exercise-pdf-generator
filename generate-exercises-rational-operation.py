@@ -43,7 +43,7 @@ ITEMSEP = "1.2cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
-GENERATE_ANSWERS = False
+GENERATE_ANSWERS = True
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Rational Numbers: Mixed Operations"
 INSTRUCTIONS = (
@@ -609,11 +609,11 @@ def generate_expression():
     return f"{latex_rational(a)} {latex_op('*')} {latex_rational(b)}", a * b
 
 
-def generate_exercises():
-    """Return EXERCISE_COUNT unique (latex, value) exercise pairs."""
+def generate_exercises(count=EXERCISE_COUNT):
+    """Return `count` unique (latex, value) exercise pairs."""
     exercises = []
     seen = set()
-    while len(exercises) < EXERCISE_COUNT:
+    while len(exercises) < count:
         latex, value = generate_expression()
         # Skip duplicates so the worksheet does not repeat the same problem
         if latex in seen:

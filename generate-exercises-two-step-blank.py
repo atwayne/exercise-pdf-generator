@@ -32,8 +32,8 @@ GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Two-Step Blank"
 INSTRUCTIONS = (
-    "Find the missing number in each two-step expression, "
-    "All answers are whole positive integers."
+    """Find the missing number in each two-step expression, """
+    r"""() first, then $\times$ and $\div$, then + and $-$. Always working left to right."""
 )
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "two_step_blank"
@@ -242,12 +242,12 @@ def generate_one_exercise():
     }
 
 
-def generate_exercises():
-    """Return EXERCISE_COUNT unique two-step blank exercises."""
+def generate_exercises(count=EXERCISE_COUNT):
+    """Return `count` unique two-step blank exercises."""
     exercises = []
     seen = set()
     # Extra attempts so duplicate expressions can be replaced
-    while len(exercises) < EXERCISE_COUNT:
+    while len(exercises) < count:
         exercise = generate_one_exercise()
         key = expression_key(exercise)
         if key in seen:

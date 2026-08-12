@@ -63,9 +63,9 @@ def generate_one_exercise():
         }
 
 
-def generate_exercises():
-    """Return EXERCISE_COUNT missing-number mean exercises."""
-    return [generate_one_exercise() for _ in range(EXERCISE_COUNT)]
+def generate_exercises(count=EXERCISE_COUNT):
+    """Return `count` missing-number mean exercises."""
+    return [generate_one_exercise() for _ in range(count)]
 
 
 def format_question(exercise):

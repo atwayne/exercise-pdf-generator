@@ -25,7 +25,7 @@ ITEMSEP = "0.8cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
-GENERATE_ANSWERS = True
+GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Target Sum"
 INSTRUCTIONS = (
@@ -70,9 +70,9 @@ def generate_one_exercise():
     }
 
 
-def generate_exercises():
-    """Return EXERCISE_COUNT target-sum exercises."""
-    return [generate_one_exercise() for _ in range(EXERCISE_COUNT)]
+def generate_exercises(count=EXERCISE_COUNT):
+    """Return `count` target-sum exercises."""
+    return [generate_one_exercise() for _ in range(count)]
 
 
 def format_question(exercise):

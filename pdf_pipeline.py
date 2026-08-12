@@ -9,6 +9,8 @@ from string import Template
 ROOT = Path(__file__).resolve().parent
 # Shared worksheet template with string.Template placeholders
 TEMPLATE_FILE = ROOT / "templates" / "worksheet.tex"
+# Multi-section worksheet template (grouped by exercise type)
+GROUPED_TEMPLATE_FILE = ROOT / "templates" / "grouped_worksheet.tex"
 # Intermediate LaTeX artifacts removed after a successful compile
 LATEX_ARTIFACT_EXTS = (".tex", ".log", ".aux")
 
@@ -39,6 +41,75 @@ def build_answers_section(answer_bodies, *, column_count, itemsep):
     )
 
 
+def build_group_section(
+    *,
+    group_number,
+    title,
+    instructions,
+    item_bodies,
+    column_count,
+    itemsep,
+    include_vspace=True,
+):
+    """
+    Build one numbered group: header, instructions, and an enumerate that
+    restarts at 1. item_bodies are already-formatted \\item contents.
+    """
+    items = format_enumerate_items(item_bodies)
+    # Tight gap between successive groups on the worksheet
+    vspace = "\\vspace{0.35cm}\n\n" if include_vspace else ""
+    # Question groups include instructions; answer groups omit them
+    if instructions:
+        header = (
+            f"\\noindent\\textbf{{{group_number}. {title}}}\\\\[0.15cm]\n"
+            f"\\noindent {instructions}\\\\[0.2cm]\n"
+        )
+    else:
+        header = f"\\noindent\\textbf{{{group_number}. {title}}}\\\\[0.2cm]\n"
+    return (
+        f"{header}"
+        f"\\begin{{multicols}}{{{column_count}}}\n"
+        f"\\begin{{enumerate}}[label=\\textbf{{\\arabic*.}}, itemsep={itemsep}]\n"
+        f"{items}\n"
+        "\\end{enumerate}\n"
+        "\\end{multicols}\n"
+        f"{vspace}"
+    )
+
+
+def build_grouped_answers_section(groups):
+    """
+    Build a new-page answer key with the same group numbering as the questions.
+    Each entry in groups is a dict with keys:
+    group_number, title, answer_bodies, column_count, itemsep.
+    """
+    if not groups:
+        return ""
+
+    parts = [
+        "\\newpage\n",
+        "\\noindent\\textbf{Answer Key}\n",
+        "\n",
+        "\\vspace{0.5cm}\n",
+        "\n",
+    ]
+    for i, group in enumerate(groups):
+        # No trailing vspace after the last answer group
+        include_vspace = i < len(groups) - 1
+        parts.append(
+            build_group_section(
+                group_number=group["group_number"],
+                title=group["title"],
+                instructions="",
+                item_bodies=group["answer_bodies"],
+                column_count=group["column_count"],
+                itemsep=group["itemsep"],
+                include_vspace=include_vspace,
+            )
+        )
+    return "".join(parts)
+
+
 def render_worksheet(
     *,
     title,
@@ -55,6 +126,23 @@ def render_worksheet(
         column_count=column_count,
         itemsep=itemsep,
         items=items,
+        answers_section=answers_section,
+    )
+
+
+def render_grouped_worksheet(
+    *,
+    title,
+    body,
+    answers_section="",
+    instructions="",
+):
+    """Fill templates/grouped_worksheet.tex and return the complete LaTeX source."""
+    # instructions kept for API compatibility; combined sheets leave it unused
+    _ = instructions
+    return Template(GROUPED_TEMPLATE_FILE.read_text(encoding="utf-8")).substitute(
+        title=title,
+        body=body,
         answers_section=answers_section,
     )
 

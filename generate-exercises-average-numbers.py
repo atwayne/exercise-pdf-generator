@@ -22,7 +22,7 @@ ITEMSEP = "0.8cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
-GENERATE_ANSWERS = True
+GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Calculating Averages"
 INSTRUCTIONS = (
@@ -33,10 +33,10 @@ INSTRUCTIONS = (
 OUTPUT_PREFIX = "average_exercises"
 
 
-def generate_exercises():
-    """Return EXERCISE_COUNT number lists whose mean is a whole integer."""
+def generate_exercises(count=EXERCISE_COUNT):
+    """Return `count` number lists whose mean is a whole integer."""
     exercises = []
-    while len(exercises) < EXERCISE_COUNT:
+    while len(exercises) < count:
         # Pick length of this number set within the configured range
         length = random.randint(NUMBERS_PER_EXERCISE_MIN, NUMBERS_PER_EXERCISE_MAX)
         # Draw random integers within the configured value range
