@@ -313,6 +313,11 @@ def generate_groups(counts):
                 "instructions": mod.INSTRUCTIONS,
                 "column_count": mod.COLUMN_COUNT,
                 "itemsep": mod.ITEMSEP,
+                # Answers may use a tighter grid than the questions
+                "answer_column_count": getattr(
+                    mod, "ANSWER_COLUMN_COUNT", mod.COLUMN_COUNT
+                ),
+                "answer_itemsep": getattr(mod, "ANSWER_ITEMSEP", "0.3cm"),
                 "exercises": exercises,
                 "format_question": entry["format_question"],
                 "format_answer": entry["format_answer"],
@@ -365,8 +370,8 @@ def build_latex(groups, *, title):
                 "group_number": group["group_number"],
                 "title": group["title"],
                 "answer_bodies": answer_bodies,
-                "column_count": group["column_count"],
-                "itemsep": group["itemsep"],
+                "column_count": group["answer_column_count"],
+                "itemsep": group["answer_itemsep"],
             }
         )
 

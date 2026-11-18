@@ -27,16 +27,14 @@ TWO_STEP_PROBABILITY = 0.6
 # Chance a generated claim is true (rest are false)
 TRUE_PROBABILITY = 0.45
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.8cm"
+ITEMSEP = "0.32cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "True or False"
-INSTRUCTIONS = (
-    "Write T or F in the blank. If F, also write the correct result."
-)
+INSTRUCTIONS = "Write T or F. If F, write the correct value."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "true_false_fix"
 # Binary operators used in generated expressions
@@ -45,7 +43,7 @@ OPS = ("+", "-", "*", "/")
 LAYOUT_LEFT = "left"
 LAYOUT_RIGHT = "right"
 # Short blank placed beside the expression for T/F (and the fix if false)
-BLANK_LATEX = "[~~]"
+BLANK_LATEX = "[~~~~]"
 
 
 def is_additive(op):
@@ -269,8 +267,8 @@ def format_question(exercise):
 def format_answer(exercise):
     """Format True, or False plus the correct result."""
     if exercise["is_true"]:
-        return r"\textbf{True}"
-    return rf"\textbf{{False}}, {exercise['true_result']}"
+        return "True"
+    return rf"False, {exercise['true_result']}"
 
 
 def preview_line(exercise):

@@ -4,6 +4,12 @@
 \geometry{a4paper, margin=1in}
 \usepackage{enumitem}
 \usepackage{multicol}
+\usepackage{needspace}
+% Kill the default ~13pt pad above/below every multicols group
+\setlength{\multicolsep}{0pt}
+\setlength{\parskip}{0pt}
+% Do not stretch item gaps when the two columns have different heights
+\raggedcolumns
 
 \title{\textbf{$title}}
 \author{}
@@ -11,7 +17,7 @@
 
 \begin{document}
 \maketitle
-\vspace{-1.5cm}
+\vspace{-1.7cm}
 
 $body
 

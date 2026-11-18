@@ -18,16 +18,14 @@ NUMBERS_PER_EXERCISE_MAX = 6
 NUMBER_VALUE_MIN = 1
 NUMBER_VALUE_MAX = 20
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.6cm"
+ITEMSEP = "0.32cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
-TITLE = "Missing Number for Mean"
-INSTRUCTIONS = (
-    "Find the missing number so the average (mean) of each list equals the given mean. "
-)
+TITLE = "Missing Mean"
+INSTRUCTIONS = "Find the missing number so the mean matches."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "missing_mean"
 
@@ -69,16 +67,15 @@ def generate_exercises(count=EXERCISE_COUNT):
 
 def format_question(exercise):
     """Format one mean + blanked list as a LaTeX enumerate item body."""
-    # Escape underscores for LaTeX (\_\_ renders as __)
-    parts = [r"\_\_" if n is None else str(n) for n in exercise["numbers"]]
+    parts = ["[~~~]" if n is None else str(n) for n in exercise["numbers"]]
     joined = ", ".join(parts)
     mean = exercise["mean"]
-    return rf"Mean: {mean}. \\[0.2cm] \textbf{{ {joined} }}"
+    return rf"Mean: {mean}. \quad \textbf{{{joined}}}"
 
 
 def format_answer(exercise):
     """Format the missing integer as a LaTeX enumerate item body."""
-    return rf"\textbf{{{exercise['answer']}}}"
+    return str(exercise["answer"])
 
 
 def main():

@@ -89,6 +89,7 @@ python generate-exercises.py --list-templates
 | `smart-calc` | Smart Calculation / `smart_calc` | smart-calc 18 |
 | `anders-puzzles` | Anders / `anders_puzzles` | true-false-fix 3, function-machine 3, comparison-blank 3, balance 3, odd-one-out 2, sequence 3, two-truths 2 |
 | `mixed` | Mixed / `mixed` | 4 of each type (linear 3, digit-mul-steps 3) |
+| `all` | All Types / `all` | 4 of every exercise type |
 
 Output PDFs are named with a timestamp, for example:
 

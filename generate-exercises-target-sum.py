@@ -21,16 +21,14 @@ DISTRACTORS_MAX = 2
 NUMBER_VALUE_MIN = 1
 NUMBER_VALUE_MAX = 20
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.8cm"
+ITEMSEP = "0.32cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Target Sum"
-INSTRUCTIONS = (
-    "For each exercise, circle the numbers that add up to the target. "
-)
+INSTRUCTIONS = "Circle the numbers that add to the target."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "target_sum"
 
@@ -80,23 +78,21 @@ def format_question(exercise):
     joined = ", ".join(map(str, exercise["numbers"]))
     target = exercise["target"]
     return (
-        rf"Target: {target}. "
-        rf"\\[0.2cm] \textbf{{ {joined} }}"
+        rf"Target: {target}.\\[0.12cm] "
+        rf"\textbf{{{joined}}}"
     )
 
 
 def format_answer(exercise):
-    """Format the list with intended solution numbers underlined and bold."""
-    parts = []
+    """Format the circled numbers only, in list order."""
     selected = set(exercise["selected_indices"])
-    for i, value in enumerate(exercise["numbers"]):
-        text = str(value)
-        # Mark the intended contributor subset for the answer key
-        if i in selected:
-            text = rf"\underline{{\textbf{{{text}}}}}"
-        parts.append(text)
-    joined = ", ".join(parts)
-    return rf"Target: {exercise['target']}. {joined}"
+    parts = [
+        str(value)
+        for i, value in enumerate(exercise["numbers"])
+        if i in selected
+    ]
+    # No spaces after commas so several selected lists fit on one key line
+    return ",".join(parts)
 
 
 def main():

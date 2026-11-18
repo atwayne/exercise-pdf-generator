@@ -4,6 +4,10 @@
 \geometry{a4paper, margin=1in}
 \usepackage{enumitem}
 \usepackage{multicol}
+\usepackage{needspace}
+\setlength{\multicolsep}{0pt}
+\setlength{\parskip}{0pt}
+\raggedcolumns
 
 \title{\textbf{$title}}
 \author{}
@@ -14,9 +18,9 @@
 \vspace{-1.5cm}
 \noindent $instructions
 
-\vspace{0.15cm}
+\vspace{0.10cm}
 
-$columns_begin\begin{enumerate}[label=\textbf{\arabic*.}, itemsep=$itemsep, topsep=0pt]
+$columns_begin\begin{enumerate}[label=\textbf{\arabic*.}, itemsep=$itemsep, topsep=0pt, parsep=0pt, partopsep=0pt]
 $items
 \end{enumerate}
 $columns_end

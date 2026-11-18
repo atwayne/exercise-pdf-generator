@@ -22,16 +22,17 @@ EXAMPLE_COUNT = 3
 # How many times to retry building one valid exercise
 GENERATION_ATTEMPTS = 300
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.6cm"
-# One column so each machine stays on a single line
-COLUMN_COUNT = 1
+ITEMSEP = "0.32cm"
+# Two per row; each machine is one compact in/out line
+COLUMN_COUNT = 2
+# Answers are a number plus a short rule
+ANSWER_COLUMN_COUNT = 2
+ANSWER_ITEMSEP = "0.4cm"
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Function Machine"
-INSTRUCTIONS = (
-    "Each machine uses one rule. Use the given pairs, then fill in the missing output."
-)
+INSTRUCTIONS = "Find the rule, then fill in the missing output."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "function_machine"
 # Rule kinds used by the machine
@@ -54,7 +55,7 @@ RULE_CHOICES = (
     RULE_MUL_SUB,
 )
 # LaTeX placeholder drawn where the missing output belongs
-BLANK_LATEX = r"[~~~~~]"
+BLANK_LATEX = "[~~~]"
 
 
 def in_output_range(n):
@@ -181,19 +182,18 @@ def generate_exercises(count=EXERCISE_COUNT):
 
 
 def format_question(exercise):
-    """Format given pairs and the blank output on a single unbreakable line."""
+    """Format given pairs and the blank output as one compact machine."""
     example_tex = r",\ ".join(
         rf"{n} \rightarrow {out}" for n, out in exercise["examples"]
     )
     prompt = rf"{exercise['prompt_in']} \rightarrow {BLANK_LATEX}"
-    # mbox keeps the whole machine on one line (no wrap onto a second row)
-    return rf"\mbox{{${example_tex},\ {prompt}$}}"
+    return rf"${example_tex},\ {prompt}$"
 
 
 def format_answer(exercise):
     """Format the missing output and the rule."""
     rule = rule_latex(exercise["kind"], exercise["a"], exercise["b"])
-    return rf"\textbf{{{exercise['answer']}}} \quad (${rule}$)"
+    return rf"{exercise['answer']} (${rule}$)"
 
 
 def preview_line(exercise):

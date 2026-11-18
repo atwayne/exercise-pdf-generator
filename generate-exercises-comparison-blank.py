@@ -20,16 +20,14 @@ ANSWER_MAX = 20
 # How many times to retry building one valid exercise
 GENERATION_ATTEMPTS = 400
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.7cm"
+ITEMSEP = "0.32cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
-TITLE = "Comparison Blank"
-INSTRUCTIONS = (
-    "Write the smallest or largest whole number that makes each comparison true."
-)
+TITLE = "Comparisons"
+INSTRUCTIONS = "Write the smallest or largest whole number that works."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "comparison_blank"
 # Goal words printed on the question
@@ -39,7 +37,7 @@ GOAL_LARGEST = "largest"
 CMP_LT = "<"
 CMP_GT = ">"
 # LaTeX placeholder drawn where the missing number belongs
-BLANK_LATEX = r"[~~~~~]"
+BLANK_LATEX = "[~~~]"
 
 
 def latex_op(op):
@@ -255,7 +253,7 @@ def format_question(exercise):
 
 def format_answer(exercise):
     """Format the whole-number answer."""
-    return rf"\textbf{{{exercise['answer']}}}"
+    return str(exercise["answer"])
 
 
 def preview_line(exercise):

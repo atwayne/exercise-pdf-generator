@@ -27,16 +27,17 @@ TWO_STEP_PROBABILITY = 0.55
 # Offsets used to make a false printed result look plausible
 FALSE_DELTAS = (1, 2, 3, 4, 5, -1, -2, -3, -4)
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "1.0cm"
-# One column so three stacked claims stay readable
-COLUMN_COUNT = 1
+ITEMSEP = "0.32cm"
+# Two sets per row; each set is four short lines
+COLUMN_COUNT = 2
+# Answers are a letter plus the corrected result
+ANSWER_COLUMN_COUNT = 2
+ANSWER_ITEMSEP = "0.4cm"
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Two Truths and a Lie"
-INSTRUCTIONS = (
-    "Exactly one statement is false. Write the letter of the lie."
-)
+INSTRUCTIONS = "Write the letter of the lie."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "two_truths"
 # Binary operators used in generated expressions
@@ -47,7 +48,7 @@ LAYOUT_RIGHT = "right"
 # Labels printed beside the three claims
 LETTERS = ("A", "B", "C")
 # LaTeX placeholder for the lie's letter
-BLANK_LATEX = r"[~~~~~]"
+BLANK_LATEX = "[~~~]"
 
 
 def is_additive(op):
@@ -324,14 +325,14 @@ def format_question(exercise):
     lines = []
     for claim in exercise["claims"]:
         lines.append(rf"{claim['letter']}.\ ${claim['latex']}$")
-    body = r"\\[0.12cm] ".join(lines)
-    return rf"{body}\\[0.25cm] The lie is: {BLANK_LATEX}"
+    body = r"\\[0.08cm] ".join(lines)
+    return rf"{body}\\[0.12cm] The lie is: {BLANK_LATEX}"
 
 
 def format_answer(exercise):
     """Format the lie's letter and the corrected result."""
     lie = next(c for c in exercise["claims"] if c["is_lie"])
-    return rf"\textbf{{{exercise['lie_letter']}}} \quad (${lie['true_result']}$)"
+    return rf"{exercise['lie_letter']} (${lie['true_result']}$)"
 
 
 def preview_line(exercise):

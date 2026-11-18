@@ -29,17 +29,17 @@ VALUE_DEN_MAX = 16
 # Retries when sampling a full system that meets all constraints
 SYSTEM_ATTEMPTS = 80
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "1.4cm"
+ITEMSEP = "0.32cm"
 # Single column so each cases block has horizontal room
 COLUMN_COUNT = 1
+# Answers are a short ordered pair
+ANSWER_COLUMN_COUNT = 2
+ANSWER_ITEMSEP = "0.5cm"
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = True
 # Worksheet title and instructions injected into the LaTeX template
-TITLE = "Systems of Linear Equations"
-INSTRUCTIONS = (
-    "Solve each system of linear equations for $(x, y)$. "
-    "simplify all answers."
-)
+TITLE = "Linear Systems"
+INSTRUCTIONS = "Solve for $(x, y)$. Simplify."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "linear_systems"
 
@@ -312,18 +312,18 @@ def format_question(system):
     line1 = format_equation(*eq1)
     line2 = format_equation(*eq2)
     return (
-        r"Solve the system: \\[0.3cm] "
         r"$\begin{cases} "
         f"{line1} \\\\ "
         f"{line2} "
         r"\end{cases}$"
+        r" \quad $x = [~~~],\ y = [~~~]$"
     )
 
 
 def format_answer(system):
     """Format the solution ordered pair as a LaTeX enumerate item body."""
     _, _, x, y = system
-    return rf"$(x, y) = \left({latex_answer(x)}, {latex_answer(y)}\right)$"
+    return rf"$\left({latex_answer(x)},\ {latex_answer(y)}\right)$"
 
 
 def main():

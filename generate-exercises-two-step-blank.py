@@ -24,7 +24,7 @@ GENERATION_ATTEMPTS = 200
 # When False, wrap only when order of operations would change the first step.
 ALWAYS_WRAP_FIRST_STEP = False
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.6cm"
+ITEMSEP = "0.32cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
@@ -32,8 +32,7 @@ GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Two-Step Blank"
 INSTRUCTIONS = (
-    """Find the missing number in each two-step expression, """
-    r"""() first, then $\times$ and $\div$, then + and $-$. Always working left to right."""
+    r"Fill the blank. () then $\times\div$ then $+-$, left to right."
 )
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "two_step_blank"
@@ -46,7 +45,7 @@ LAYOUT_RIGHT = "right"
 # Blank can hide any of the three numeric slots
 BLANK_SLOTS = ("x", "y", "z")
 # LaTeX placeholder drawn where the missing number belongs
-BLANK_LATEX = r"[~~~~~]"
+BLANK_LATEX = "[~~~~]"
 
 
 def is_additive(op):
@@ -274,7 +273,7 @@ def format_question(exercise):
 
 def format_answer(exercise):
     """Format the missing integer as a LaTeX enumerate item body."""
-    return rf"\textbf{{{exercise['answer']}}}"
+    return str(exercise["answer"])
 
 
 def preview_line(exercise):

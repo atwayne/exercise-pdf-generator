@@ -15,16 +15,19 @@ GROUPED_TEMPLATE_FILE = ROOT / "templates" / "grouped_worksheet.tex"
 LATEX_ARTIFACT_EXTS = (".tex", ".log", ".aux")
 
 
-def format_enumerate_items(bodies):
+def format_enumerate_items(bodies, *, keep_together=True):
     """Turn item body strings into indented \\item lines for the template.
 
-    Each item is wrapped in a top-aligned minipage so a multi-line exercise
-    cannot split across multicols columns.
+    When keep_together is True, wrap each item in a top-aligned minipage so a
+    multi-line exercise cannot split across multicols columns. Answer keys skip
+    the minipage so lookup values pack more tightly.
     """
-    return "\n".join(
-        rf"    \item \begin{{minipage}}[t]{{\linewidth}}{body}\end{{minipage}}"
-        for body in bodies
-    )
+    if keep_together:
+        return "\n".join(
+            rf"    \item \begin{{minipage}}[t]{{\linewidth}}{body}\end{{minipage}}"
+            for body in bodies
+        )
+    return "\n".join(f"    \\item {body}" for body in bodies)
 
 
 def wrap_in_columns(inner, column_count):
@@ -44,25 +47,34 @@ def wrap_in_columns(inner, column_count):
     )
 
 
+def format_inline_answers(bodies):
+    """Join numbered answers on one line for a compact lookup key."""
+    return r" \quad ".join(
+        f"{i}. {body}"
+        for i, body in enumerate(bodies, 1)
+    )
+
+
 def build_answers_section(answer_bodies, *, column_count, itemsep):
     """
     Build a new-page answer key section for the worksheet template.
-    answer_bodies are already-formatted item contents (same order as questions).
+    Standalone sheets use a small-type list; combined sheets use the
+    grouped compact key instead.
     """
-    items = format_enumerate_items(answer_bodies)
-    # Keep structure aligned with the questions page for easy cross-checking
+    items = format_enumerate_items(answer_bodies, keep_together=False)
     enum = (
-        f"\\begin{{enumerate}}[label=\\textbf{{\\arabic*.}}, itemsep={itemsep}]\n"
+        f"\\begin{{enumerate}}[label=\\arabic*., "
+        f"itemsep={itemsep}, topsep=0pt, parsep=0pt, partopsep=0pt]\n"
         f"{items}\n"
         "\\end{enumerate}\n"
     )
     return (
         "\\newpage\n"
-        "\\noindent\\textbf{Answer Key}\n"
-        "\n"
-        "\\vspace{0.5cm}\n"
-        "\n"
+        "\\noindent\\textbf{Answer Key}\\\\[0.12cm]\n"
+        "\\begingroup\n"
+        "\\footnotesize\n"
         f"{wrap_in_columns(enum, column_count)}"
+        "\\endgroup\n"
     )
 
 
@@ -75,25 +87,47 @@ def build_group_section(
     column_count,
     itemsep,
     include_vspace=True,
+    compact=False,
 ):
     """
     Build one numbered group: header, instructions, and an enumerate that
     restarts at 1. item_bodies are already-formatted \\item contents.
+
+    compact=True is for the answer key: tighter headers, gaps, and no minipage.
     """
-    items = format_enumerate_items(item_bodies)
-    # Tight gap between successive groups on the worksheet
-    vspace = "\\vspace{0.1cm}\n\n" if include_vspace else ""
-    # Question groups include instructions; answer groups omit them
+    items = format_enumerate_items(item_bodies, keep_together=not compact)
+    if compact:
+        # Answer key: compact lookup, still a clear break between typed sections
+        vspace = "\\vspace{0.12cm}\n" if include_vspace else ""
+        keep = "\\Needspace{2.4cm}\n"
+        title_skip = "0.03cm"
+        after_header = "0.06cm"
+    else:
+        # Questions: title+instructions stay close; items keep write-in space
+        vspace = "\\vspace{0.20cm}\n" if include_vspace else ""
+        keep = "\\Needspace{4.2cm}\n"
+        title_skip = "0.04cm"
+        after_header = "0.10cm"
+    # Question groups include instructions; answer groups omit them.
+    # \\* forbids a page break after the header so it cannot sit alone.
     if instructions:
         header = (
-            f"\\noindent\\textbf{{{group_number}. {title}}}\\\\[0.15cm]\n"
-            f"\\noindent {instructions}\\\\[0pt]\n"
+            f"{keep}"
+            f"\\noindent\\textbf{{{group_number}. {title}}}\\\\*[{title_skip}]\n"
+            f"\\noindent {instructions}\\\\*[{after_header}]\n"
         )
     else:
-        header = f"\\noindent\\textbf{{{group_number}. {title}}}\\\\[0.2cm]\n"
-    # topsep=0pt keeps the list tight under the description
+        header = (
+            f"{keep}"
+            f"\\noindent\\textbf{{{group_number}. {title}}}\\\\*[{after_header}]\n"
+        )
+    # Rigid itemsep so 2-col balancing cannot stretch some gaps and not others.
+    # Do not cancel the last itemsep here: enumitem `after` only hits the last
+    # list item (usually the right column), which made some section gaps smaller.
     enum = (
-        f"\\begin{{enumerate}}[label=\\textbf{{\\arabic*.}}, itemsep={itemsep}, topsep=0pt]\n"
+        f"\\begin{{enumerate}}[label=\\textbf{{\\arabic*.}}, "
+        f"itemsep={itemsep} plus 0pt minus 0pt, topsep=0pt, parsep=0pt, "
+        f"partopsep=0pt]\n"
         f"{items}\n"
         "\\end{enumerate}\n"
     )
@@ -102,35 +136,36 @@ def build_group_section(
 
 def build_grouped_answers_section(groups):
     """
-    Build a new-page answer key with the same group numbering as the questions.
+    Build a one-page lookup key: small type, two columns, one block per group.
+
     Each entry in groups is a dict with keys:
     group_number, title, answer_bodies, column_count, itemsep.
     """
     if not groups:
         return ""
 
-    parts = [
-        "\\newpage\n",
-        "\\noindent\\textbf{Answer Key}\n",
-        "\n",
-        "\\vspace{0.5cm}\n",
-        "\n",
-    ]
-    for i, group in enumerate(groups):
-        # No trailing vspace after the last answer group
-        include_vspace = i < len(groups) - 1
-        parts.append(
-            build_group_section(
-                group_number=group["group_number"],
-                title=group["title"],
-                instructions="",
-                item_bodies=group["answer_bodies"],
-                column_count=group["column_count"],
-                itemsep=group["itemsep"],
-                include_vspace=include_vspace,
-            )
+    items = []
+    for group in groups:
+        answers = format_inline_answers(group["answer_bodies"])
+        items.append(
+            f"\\item[{group['group_number']}. {group['title']}] {answers}\n"
         )
-    return "".join(parts)
+
+    # Full-width rows so group gaps can be larger without a blank lower half.
+    # Same line size as the questions; only the page title is bold.
+    return (
+        "\\newpage\n"
+        "\\noindent\\textbf{Answer Key}\\\\[0.28cm]\n"
+        "\\begingroup\n"
+        "\\raggedright\n"
+        "\\begin{description}["
+        "font=\\normalfont, style=sameline, "
+        "leftmargin=5.1cm, labelwidth=4.9cm, labelsep=0.2cm, "
+        "itemsep=0.72cm, parsep=0pt, topsep=0pt, partopsep=0pt]\n"
+        f"{''.join(items)}"
+        "\\end{description}\n"
+        "\\endgroup\n"
+    )
 
 
 def render_worksheet(

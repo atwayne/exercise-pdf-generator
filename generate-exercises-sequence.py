@@ -25,23 +25,21 @@ GEO_RATIOS = (2, 3)
 # How many times to retry building one valid exercise
 GENERATION_ATTEMPTS = 300
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.6cm"
+ITEMSEP = "0.32cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
-TITLE = "Number Sequence"
-INSTRUCTIONS = (
-    "Find the missing term in each sequence."
-)
+TITLE = "Sequences"
+INSTRUCTIONS = "Fill in the missing term."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "sequence"
 # Sequence kinds
 KIND_ARITH = "arith"
 KIND_GEO = "geo"
 # LaTeX placeholder drawn where the missing term belongs
-BLANK_LATEX = r"[~~~~~]"
+BLANK_LATEX = "[~~~]"
 
 
 def in_term_range(n):
@@ -178,7 +176,7 @@ def format_question(exercise):
 def format_answer(exercise):
     """Format the missing term and the step rule."""
     rule = rule_latex(exercise["kind"], exercise["step"])
-    return rf"\textbf{{{exercise['answer']}}} \quad (${rule}$)"
+    return rf"{exercise['answer']} (${rule}$)"
 
 
 def preview_line(exercise):

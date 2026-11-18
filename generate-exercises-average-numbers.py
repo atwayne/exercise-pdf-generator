@@ -18,17 +18,16 @@ NUMBERS_PER_EXERCISE_MAX = 6
 NUMBER_VALUE_MIN = 1
 NUMBER_VALUE_MAX = 20
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.8cm"
+ITEMSEP = "0.32cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
+# Write-in blank for the integer mean (1–2 digits)
+BLANK_LATEX = "[~~~]"
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
-TITLE = "Calculating Averages"
-INSTRUCTIONS = (
-    "Find the average (mean) for each set of numbers. "
-    "All answers evaluate to a whole integer."
-)
+TITLE = "Averages"
+INSTRUCTIONS = "Find the mean of each list."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "average_exercises"
 
@@ -52,12 +51,12 @@ def generate_exercises(count=EXERCISE_COUNT):
 def format_question(nums):
     """Format one number list as a LaTeX enumerate item body."""
     joined = ", ".join(map(str, nums))
-    return rf"Find the average of: \\[0.2cm] \textbf{{ {joined} }}"
+    return rf"\textbf{{{joined}}} $= {BLANK_LATEX}$"
 
 
 def format_answer(nums):
     """Format the integer mean as a LaTeX enumerate item body."""
-    return rf"\textbf{{{sum(nums) // len(nums)}}}"
+    return str(sum(nums) // len(nums))
 
 
 def main():

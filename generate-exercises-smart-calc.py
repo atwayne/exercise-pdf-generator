@@ -38,23 +38,23 @@ GENERATION_ATTEMPTS = 400
 # Shuffle retries so intended friendly pairs are not adjacent
 SHUFFLE_ATTEMPTS = 80
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.6cm"
+ITEMSEP = "0.32cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
+# Strategy chains are too long for two answer columns
+ANSWER_COLUMN_COUNT = 1
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Smart Calculation"
-INSTRUCTIONS = (
-    r"""Look for a smarter order: pair numbers whose ones digits make 10 """
-)
+INSTRUCTIONS = "Pair ones digits that make 10, then add or subtract."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "smart_calc"
 # Operators used for one-operator chains
 OP_ADD = "+"
 OP_SUB = "-"
 # LaTeX placeholder drawn where the missing result belongs
-BLANK_LATEX = r"[~~~~~]"
+BLANK_LATEX = "[~~~~]"
 
 
 def in_value_range(n):
@@ -437,8 +437,8 @@ def format_question(exercise):
 
 
 def format_answer(exercise):
-    """Format the regrouped strategy and bold numeric result."""
-    return f"${exercise['strategy_latex']}"
+    """Format the numeric result only (answer key is lookup, not working)."""
+    return str(exercise["answer"])
 
 
 def preview_line(exercise):

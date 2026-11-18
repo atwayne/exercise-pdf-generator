@@ -24,16 +24,17 @@ GENERATION_ATTEMPTS = 400
 # Retries when searching for expressions equal to a target
 EXPR_ATTEMPTS = 80
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.9cm"
-# One column so four labeled expressions stay readable
-COLUMN_COUNT = 1
+ITEMSEP = "0.32cm"
+# Two 2x2 grids per row
+COLUMN_COUNT = 2
+# Answers are a letter plus two values
+ANSWER_COLUMN_COUNT = 2
+ANSWER_ITEMSEP = "0.4cm"
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Odd One Out"
-INSTRUCTIONS = (
-    "Three expressions have the same value. Circle the one that does not."
-)
+INSTRUCTIONS = "Circle the expression with a different value."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "odd_one_out"
 # Binary operators
@@ -268,8 +269,8 @@ def format_question(exercise):
     A and C are boxed to the same width so B and D start at the same x.
     """
     items = exercise["items"]
-    # Fixed first-column width so B lines up over D regardless of A/C length
-    col_width = "5.8cm"
+    # Half the item width so B lines up over D inside a two-column layout
+    col_width = r"0.48\linewidth"
     rows = []
     for left, right in ((items[0], items[1]), (items[2], items[3])):
         left_cell = (
@@ -281,12 +282,8 @@ def format_question(exercise):
 
 
 def format_answer(exercise):
-    """Format the odd letter and both values."""
-    return (
-        rf"\textbf{{{exercise['odd_letter']}}} "
-        rf"(others ${exercise['target']}$, "
-        rf"odd ${exercise['odd_value']}$)"
-    )
+    """Format the odd letter only (answer key is lookup, not working)."""
+    return str(exercise["odd_letter"])
 
 
 def preview_line(exercise):

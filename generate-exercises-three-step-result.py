@@ -21,7 +21,7 @@ RESULT_MAX = 100
 # How many times to retry building one valid exercise
 GENERATION_ATTEMPTS = 300
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.6cm"
+ITEMSEP = "0.32cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
@@ -29,8 +29,7 @@ GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
 TITLE = "Three-Step Result"
 INSTRUCTIONS = (
-    """Evaluate each expression. """
-    r"""() first, then $\times$ and $\div$, then + and $-$. Always working left to right."""
+    r"Evaluate. () then $\times\div$ then $+-$, left to right."
 )
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "three_step_result"
@@ -53,7 +52,7 @@ LAYOUTS = (
 # Operator precedence for minimal parentheses (higher binds tighter)
 OP_PREC = {"+": 1, "-": 1, "*": 2, "/": 2}
 # LaTeX placeholder drawn where the missing result belongs
-BLANK_LATEX = r"[~~~~~]"
+BLANK_LATEX = "[~~~~]"
 
 
 def in_value_range(n):
@@ -285,7 +284,7 @@ def format_question(exercise):
 
 def format_answer(exercise):
     """Format the computed result as a LaTeX enumerate item body."""
-    return rf"\textbf{{{exercise['answer']}}}"
+    return str(exercise["answer"])
 
 
 def preview_line(exercise):

@@ -45,23 +45,24 @@ DIFFICULTY = "junior"
 # How many times to retry building one valid exercise
 GENERATION_ATTEMPTS = 500
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "1.0cm"
-# One column so the multi-line step stack stays readable
-COLUMN_COUNT = 1
+ITEMSEP = "0.32cm"
+# Two columns: each scaffold is narrow enough to sit side by side
+COLUMN_COUNT = 2
+# Answers are a single number; pack them tighter than the scaffolds
+ANSWER_COLUMN_COUNT = 2
+ANSWER_ITEMSEP = "0.4cm"
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
-TITLE = "Two-Digit Multiplication Steps"
-INSTRUCTIONS = (
-    r"""Fill in each blank to complete the steps."""
-)
+TITLE = "Multiplication Steps"
+INSTRUCTIONS = "Fill in each blank."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "digit_mul_steps"
 # LaTeX placeholder drawn where the missing number belongs
-# Twice as wide as the usual [~~~~~] so multi-digit answers fit
-BLANK_LATEX = r"[~~~~~~~~~~]"
+# Wide enough for a 2–3 digit fill-in, short enough to fit two columns
+BLANK_LATEX = "[~~~~]"
 # Line break between scaffold steps
-STEP_GAP = r"\\[0.15cm]"
+STEP_GAP = r"\\[0.12cm]"
 # Deterministic fallback that satisfies junior (54 x 13 = 702 is too large;
 # use 24 x 15 = 360 which keeps a non-teen and expands the teen)
 FALLBACK_KEPT = 24
@@ -288,7 +289,7 @@ def format_question(exercise):
 
 def format_answer(exercise):
     """Format the final product as a LaTeX enumerate item body."""
-    return rf"\textbf{{{exercise['answer']}}}"
+    return str(exercise["answer"])
 
 
 def preview_line(exercise):

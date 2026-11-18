@@ -24,16 +24,14 @@ GENERATION_ATTEMPTS = 400
 # Retries when searching for a matching right-hand expression
 RIGHT_ATTEMPTS = 80
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.7cm"
+ITEMSEP = "0.32cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = False
 # Worksheet title and instructions injected into the LaTeX template
-TITLE = "Balance Both Sides"
-INSTRUCTIONS = (
-    "Find the missing number that makes both sides equal."
-)
+TITLE = "Balance"
+INSTRUCTIONS = "Find the number that makes both sides equal."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "balance"
 # Binary operators used when building a matching right-hand side
@@ -42,7 +40,7 @@ OPS = ("+", "-", "*", "/")
 LAYOUT_LEFT = "left"
 LAYOUT_RIGHT = "right"
 # LaTeX placeholder drawn where the missing number belongs
-BLANK_LATEX = r"[~~~~~]"
+BLANK_LATEX = "[~~~]"
 
 
 def is_additive(op):
@@ -313,7 +311,7 @@ def format_question(exercise):
 
 def format_answer(exercise):
     """Format the missing integer."""
-    return rf"\textbf{{{exercise['answer']}}}"
+    return str(exercise["answer"])
 
 
 def preview_line(exercise):

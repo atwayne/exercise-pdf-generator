@@ -39,18 +39,16 @@ FRIENDLY_ATTEMPTS = 40
 ANSWER_NUM_MAX = 36
 ANSWER_DEN_MAX = 36
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "1.2cm"
+ITEMSEP = "0.32cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
+# Write-in blank for a simplified fraction
+BLANK_LATEX = "[~~~~]"
 # When True, append a new page with the answer key
 GENERATE_ANSWERS = True
 # Worksheet title and instructions injected into the LaTeX template
-TITLE = "Rational Numbers: Mixed Operations"
-INSTRUCTIONS = (
-    "Evaluate each expression using the correct order of operations. "
-    "Pay attention to integer and fraction rules, as well as negative signs. "
-    "Simplify all answers."
-)
+TITLE = "Rational Operations"
+INSTRUCTIONS = "Evaluate and simplify."
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "rational_operations"
 
@@ -625,7 +623,7 @@ def generate_exercises(count=EXERCISE_COUNT):
 
 def format_question(latex):
     """Wrap an expression in math mode for the questions page."""
-    return f"${latex}$"
+    return f"${latex} = {BLANK_LATEX}$"
 
 
 def format_answer(value):
