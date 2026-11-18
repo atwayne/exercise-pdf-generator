@@ -57,6 +57,23 @@ def _ensure_modules():
             "target-sum": _load_module("generate-exercises-target-sum.py"),
             "two-step": _load_module("generate-exercises-two-step-blank.py"),
             "three-step": _load_module("generate-exercises-three-step-result.py"),
+            "digit-mul-steps": _load_module(
+                "generate-exercises-digit-mul-steps.py"
+            ),
+            "smart-calc": _load_module("generate-exercises-smart-calc.py"),
+            "true-false-fix": _load_module(
+                "generate-exercises-true-false-fix.py"
+            ),
+            "function-machine": _load_module(
+                "generate-exercises-function-machine.py"
+            ),
+            "comparison-blank": _load_module(
+                "generate-exercises-comparison-blank.py"
+            ),
+            "balance": _load_module("generate-exercises-balance.py"),
+            "odd-one-out": _load_module("generate-exercises-odd-one-out.py"),
+            "sequence": _load_module("generate-exercises-sequence.py"),
+            "two-truths": _load_module("generate-exercises-two-truths.py"),
         }
     )
 
@@ -107,6 +124,60 @@ def _exercise_types():
             "module": _MODULES["three-step"],
             "format_question": _MODULES["three-step"].format_question,
             "format_answer": _MODULES["three-step"].format_answer,
+        },
+        {
+            "id": "digit-mul-steps",
+            "module": _MODULES["digit-mul-steps"],
+            "format_question": _MODULES["digit-mul-steps"].format_question,
+            "format_answer": _MODULES["digit-mul-steps"].format_answer,
+        },
+        {
+            "id": "smart-calc",
+            "module": _MODULES["smart-calc"],
+            "format_question": _MODULES["smart-calc"].format_question,
+            "format_answer": _MODULES["smart-calc"].format_answer,
+        },
+        {
+            "id": "true-false-fix",
+            "module": _MODULES["true-false-fix"],
+            "format_question": _MODULES["true-false-fix"].format_question,
+            "format_answer": _MODULES["true-false-fix"].format_answer,
+        },
+        {
+            "id": "function-machine",
+            "module": _MODULES["function-machine"],
+            "format_question": _MODULES["function-machine"].format_question,
+            "format_answer": _MODULES["function-machine"].format_answer,
+        },
+        {
+            "id": "comparison-blank",
+            "module": _MODULES["comparison-blank"],
+            "format_question": _MODULES["comparison-blank"].format_question,
+            "format_answer": _MODULES["comparison-blank"].format_answer,
+        },
+        {
+            "id": "balance",
+            "module": _MODULES["balance"],
+            "format_question": _MODULES["balance"].format_question,
+            "format_answer": _MODULES["balance"].format_answer,
+        },
+        {
+            "id": "odd-one-out",
+            "module": _MODULES["odd-one-out"],
+            "format_question": _MODULES["odd-one-out"].format_question,
+            "format_answer": _MODULES["odd-one-out"].format_answer,
+        },
+        {
+            "id": "sequence",
+            "module": _MODULES["sequence"],
+            "format_question": _MODULES["sequence"].format_question,
+            "format_answer": _MODULES["sequence"].format_answer,
+        },
+        {
+            "id": "two-truths",
+            "module": _MODULES["two-truths"],
+            "format_question": _MODULES["two-truths"].format_question,
+            "format_answer": _MODULES["two-truths"].format_answer,
         },
     ]
 

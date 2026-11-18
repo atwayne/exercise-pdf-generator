@@ -25,6 +25,14 @@ pdflatex --version
 | `generate-exercises-target-sum.py` | Circle numbers in a list that add up to a target (0–2 unused distractors) |
 | `generate-exercises-two-step-blank.py` | Two-step arithmetic with one missing number (any of the three slots) |
 | `generate-exercises-three-step-result.py` | Three-step arithmetic (four numbers); student finds the result |
+| `generate-exercises-smart-calc.py` | Smart calculation: regroup all-plus or all-minus chains of 3–4 numbers |
+| `generate-exercises-true-false-fix.py` | True/false arithmetic claims; write the correct result when false |
+| `generate-exercises-function-machine.py` | In/out function machine: find the rule and the missing output |
+| `generate-exercises-comparison-blank.py` | Smallest or largest whole number that makes a comparison true |
+| `generate-exercises-balance.py` | Missing number that makes both sides of an equation equal |
+| `generate-exercises-odd-one-out.py` | Four expressions; circle the one whose value is different |
+| `generate-exercises-sequence.py` | Missing term in an arithmetic or geometric sequence |
+| `generate-exercises-two-truths.py` | Three claims, exactly one false; name the lie |
 | `generate-exercises.py` | Combined worksheet: pick a template or custom counts; groups by type |
 
 ## Usage
@@ -39,6 +47,14 @@ python generate-exercises-linear-system.py
 python generate-exercises-target-sum.py
 python generate-exercises-two-step-blank.py
 python generate-exercises-three-step-result.py
+python generate-exercises-smart-calc.py
+python generate-exercises-true-false-fix.py
+python generate-exercises-function-machine.py
+python generate-exercises-comparison-blank.py
+python generate-exercises-balance.py
+python generate-exercises-odd-one-out.py
+python generate-exercises-sequence.py
+python generate-exercises-two-truths.py
 ```
 
 ### Combined worksheet
@@ -70,7 +86,9 @@ python generate-exercises.py --list-templates
 | `arithmetic` | Arithmetic / `arithmetic` | two-step 10, three-step 10 |
 | `rationals` | Rationals / `rationals` | rational 12, linear 6 |
 | `targets` | Targets / `targets` | target-sum 18 |
-| `mixed` | Mixed / `mixed` | 4 of each type (linear 3) |
+| `smart-calc` | Smart Calculation / `smart_calc` | smart-calc 18 |
+| `anders-puzzles` | Anders / `anders_puzzles` | true-false-fix 3, function-machine 3, comparison-blank 3, balance 3, odd-one-out 2, sequence 3, two-truths 2 |
+| `mixed` | Mixed / `mixed` | 4 of each type (linear 3, digit-mul-steps 3) |
 
 Output PDFs are named with a timestamp, for example:
 
@@ -81,6 +99,7 @@ Output PDFs are named with a timestamp, for example:
 - `target_sum_20260802113000.pdf`
 - `two_step_blank_20260804074500.pdf`
 - `three_step_result_20260811000000.pdf`
+- `smart_calc_20260823000000.pdf`
 - `means_20260812100000.pdf`
 - `mixed_20260812100000.pdf`
 - `custom_20260812100000.pdf`

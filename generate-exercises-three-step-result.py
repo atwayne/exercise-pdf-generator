@@ -10,10 +10,10 @@ from pdf_pipeline import (
 )
 
 # Total number of exercises to generate
-EXERCISE_COUNT = 18
+EXERCISE_COUNT = 24
 # Inclusive range for each operand
 NUMBER_VALUE_MIN = 1
-NUMBER_VALUE_MAX = 20
+NUMBER_VALUE_MAX = 50
 # Inclusive upper bound for intermediate values
 MID_MAX = 100
 # Inclusive upper bound for the final result
@@ -21,7 +21,7 @@ RESULT_MAX = 100
 # How many times to retry building one valid exercise
 GENERATION_ATTEMPTS = 300
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "1.0cm"
+ITEMSEP = "0.6cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key

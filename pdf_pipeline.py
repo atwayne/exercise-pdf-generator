@@ -16,8 +16,32 @@ LATEX_ARTIFACT_EXTS = (".tex", ".log", ".aux")
 
 
 def format_enumerate_items(bodies):
-    """Turn item body strings into indented \\item lines for the template."""
-    return "\n".join(f"    \\item {body}" for body in bodies)
+    """Turn item body strings into indented \\item lines for the template.
+
+    Each item is wrapped in a top-aligned minipage so a multi-line exercise
+    cannot split across multicols columns.
+    """
+    return "\n".join(
+        rf"    \item \begin{{minipage}}[t]{{\linewidth}}{body}\end{{minipage}}"
+        for body in bodies
+    )
+
+
+def wrap_in_columns(inner, column_count):
+    """Wrap inner LaTeX in multicols only when more than one column is used.
+
+    A 1-column multicols environment still balances like a multi-column
+    list and can place the next item beside the current one. A plain
+    enumerate keeps each exercise in a single column.
+    """
+    count = int(column_count)
+    if count <= 1:
+        return inner
+    return (
+        f"\\begin{{multicols}}{{{count}}}\n"
+        f"{inner}"
+        "\\end{multicols}\n"
+    )
 
 
 def build_answers_section(answer_bodies, *, column_count, itemsep):
@@ -27,17 +51,18 @@ def build_answers_section(answer_bodies, *, column_count, itemsep):
     """
     items = format_enumerate_items(answer_bodies)
     # Keep structure aligned with the questions page for easy cross-checking
+    enum = (
+        f"\\begin{{enumerate}}[label=\\textbf{{\\arabic*.}}, itemsep={itemsep}]\n"
+        f"{items}\n"
+        "\\end{enumerate}\n"
+    )
     return (
         "\\newpage\n"
         "\\noindent\\textbf{Answer Key}\n"
         "\n"
         "\\vspace{0.5cm}\n"
         "\n"
-        f"\\begin{{multicols}}{{{column_count}}}\n"
-        f"\\begin{{enumerate}}[label=\\textbf{{\\arabic*.}}, itemsep={itemsep}]\n"
-        f"{items}\n"
-        "\\end{enumerate}\n"
-        "\\end{multicols}\n"
+        f"{wrap_in_columns(enum, column_count)}"
     )
 
 
@@ -57,24 +82,22 @@ def build_group_section(
     """
     items = format_enumerate_items(item_bodies)
     # Tight gap between successive groups on the worksheet
-    vspace = "\\vspace{0.35cm}\n\n" if include_vspace else ""
+    vspace = "\\vspace{0.1cm}\n\n" if include_vspace else ""
     # Question groups include instructions; answer groups omit them
     if instructions:
         header = (
             f"\\noindent\\textbf{{{group_number}. {title}}}\\\\[0.15cm]\n"
-            f"\\noindent {instructions}\\\\[0.2cm]\n"
+            f"\\noindent {instructions}\\\\[0pt]\n"
         )
     else:
         header = f"\\noindent\\textbf{{{group_number}. {title}}}\\\\[0.2cm]\n"
-    return (
-        f"{header}"
-        f"\\begin{{multicols}}{{{column_count}}}\n"
-        f"\\begin{{enumerate}}[label=\\textbf{{\\arabic*.}}, itemsep={itemsep}]\n"
+    # topsep=0pt keeps the list tight under the description
+    enum = (
+        f"\\begin{{enumerate}}[label=\\textbf{{\\arabic*.}}, itemsep={itemsep}, topsep=0pt]\n"
         f"{items}\n"
         "\\end{enumerate}\n"
-        "\\end{multicols}\n"
-        f"{vspace}"
     )
+    return f"{header}{wrap_in_columns(enum, column_count)}{vspace}"
 
 
 def build_grouped_answers_section(groups):
@@ -120,10 +143,16 @@ def render_worksheet(
     answers_section="",
 ):
     """Fill templates/worksheet.tex and return the complete LaTeX source."""
+    columns_begin = ""
+    columns_end = ""
+    if int(column_count) > 1:
+        columns_begin = f"\\begin{{multicols}}{{{column_count}}}\n"
+        columns_end = "\\end{multicols}\n"
     return Template(TEMPLATE_FILE.read_text(encoding="utf-8")).substitute(
         title=title,
         instructions=instructions,
-        column_count=column_count,
+        columns_begin=columns_begin,
+        columns_end=columns_end,
         itemsep=itemsep,
         items=items,
         answers_section=answers_section,

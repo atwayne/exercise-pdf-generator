@@ -10,10 +10,10 @@ from pdf_pipeline import (
 )
 
 # Total number of exercises to generate
-EXERCISE_COUNT = 18
+EXERCISE_COUNT = 20
 # Inclusive range for each operand and the missing answer
 NUMBER_VALUE_MIN = 1
-NUMBER_VALUE_MAX = 20
+NUMBER_VALUE_MAX = 50
 # Inclusive upper bound for the intermediate (first-step) value
 MID_MAX = 100
 # Inclusive upper bound for the final result
@@ -22,9 +22,9 @@ RESULT_MAX = 100
 GENERATION_ATTEMPTS = 200
 # When True, always wrap the first-step pair in parentheses.
 # When False, wrap only when order of operations would change the first step.
-ALWAYS_WRAP_FIRST_STEP = True
+ALWAYS_WRAP_FIRST_STEP = False
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "1.0cm"
+ITEMSEP = "0.6cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key

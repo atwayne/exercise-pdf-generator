@@ -18,7 +18,7 @@ NUMBERS_PER_EXERCISE_MAX = 6
 NUMBER_VALUE_MIN = 1
 NUMBER_VALUE_MAX = 20
 # Vertical spacing between enumerate items in the LaTeX PDF
-ITEMSEP = "0.8cm"
+ITEMSEP = "0.6cm"
 # Number of columns in the exercise layout
 COLUMN_COUNT = 2
 # When True, append a new page with the answer key
@@ -27,7 +27,6 @@ GENERATE_ANSWERS = False
 TITLE = "Missing Number for Mean"
 INSTRUCTIONS = (
     "Find the missing number so the average (mean) of each list equals the given mean. "
-    "All answers are whole integers."
 )
 # Output file name prefix (timestamp yyyyMMddHHmmss is appended)
 OUTPUT_PREFIX = "missing_mean"
